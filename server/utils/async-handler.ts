@@ -1,0 +1,17 @@
+import type { NextFunction, Request, Response } from "express";
+
+type AsyncRequestHandler = (
+  request: Request,
+  response: Response,
+  next: NextFunction
+) => Promise<unknown>;
+
+export function asyncHandler(handler: AsyncRequestHandler) {
+  return function wrappedHandler(
+    request: Request,
+    response: Response,
+    next: NextFunction
+  ) {
+    handler(request, response, next).catch(next);
+  };
+}

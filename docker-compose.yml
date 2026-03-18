@@ -1,0 +1,126 @@
+version: "3.9"
+
+services:
+  dashboard-db:
+    image: postgres:16-alpine
+    container_name: pentest_dashboard_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: pentest_dashboard
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - dashboard_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d pentest_dashboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dashboard-redis:
+    image: redis:7-alpine
+    container_name: pentest_dashboard_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - dashboard_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  dashboard-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:4000}
+    image: pentest-dashboard:latest
+    container_name: pentest_dashboard_api
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: ["sh", "-c", "npm run prisma:migrate:deploy && npm run start:api"]
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      APP_URL: ${APP_URL:-http://localhost:3000}
+      API_URL: ${API_URL:-http://localhost:4000}
+      SOCKET_URL: ${SOCKET_URL:-http://localhost:4000}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      DATABASE_URL: postgresql://postgres:postgres@dashboard-db:5432/pentest_dashboard?schema=public
+      REDIS_URL: redis://dashboard-redis:6379
+      REPORT_STORAGE_PATH: /app/storage/reports
+    ports:
+      - "4000:4000"
+    depends_on:
+      dashboard-db:
+        condition: service_healthy
+      dashboard-redis:
+        condition: service_healthy
+    volumes:
+      - dashboard_reports:/app/storage/reports
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:4000/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+  dashboard-worker:
+    image: pentest-dashboard:latest
+    container_name: pentest_dashboard_worker
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: ["npm", "run", "start:worker"]
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@dashboard-db:5432/pentest_dashboard?schema=public
+      REDIS_URL: redis://dashboard-redis:6379
+      REPORT_STORAGE_PATH: /app/storage/reports
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-12h}
+    depends_on:
+      dashboard-db:
+        condition: service_healthy
+      dashboard-redis:
+        condition: service_healthy
+      dashboard-api:
+        condition: service_healthy
+    volumes:
+      - dashboard_reports:/app/storage/reports
+
+  dashboard-web:
+    image: pentest-dashboard:latest
+    container_name: pentest_dashboard_web
+    restart: unless-stopped
+    env_file:
+      - .env
+    command: ["npm", "run", "start:web"]
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+      NEXT_PUBLIC_SOCKET_URL: ${NEXT_PUBLIC_SOCKET_URL:-http://localhost:4000}
+    ports:
+      - "3000:3000"
+    depends_on:
+      dashboard-api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://127.0.0.1:3000/api/health >/dev/null || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+volumes:
+  dashboard_postgres_data:
+  dashboard_redis_data:
+  dashboard_reports:

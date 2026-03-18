@@ -1,0 +1,11 @@
+.next
+dist
+node_modules
+npm-debug.log
+.env
+.env.local
+coverage
+storage/reports/*
+!storage/reports/.gitkeep
+docker-compose*.yml
+README.md
