@@ -1,7 +1,7 @@
 FROM node:20-bookworm-slim AS builder
 
-ARG NEXT_PUBLIC_API_URL=http://localhost:4000
-ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+ARG NEXT_PUBLIC_API_URL=https://api.naren.web.id
+ARG NEXT_PUBLIC_SOCKET_URL=https://api.naren.web.id
 
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 ENV NEXT_PUBLIC_SOCKET_URL=${NEXT_PUBLIC_SOCKET_URL}
@@ -22,8 +22,8 @@ RUN npm run build
 
 FROM node:20-bookworm-slim AS runner
 
-ARG NEXT_PUBLIC_API_URL=http://localhost:4000
-ARG NEXT_PUBLIC_SOCKET_URL=http://localhost:4000
+ARG NEXT_PUBLIC_API_URL=https://api.naren.web.id
+ARG NEXT_PUBLIC_SOCKET_URL=https://api.naren.web.id
 
 ENV NODE_ENV=production
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}

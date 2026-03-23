@@ -11,14 +11,16 @@ const statusStyles = {
   pending: "border-sky-400/20 bg-sky-500/10 text-sky-200",
   running: "border-amber-400/20 bg-amber-500/10 text-amber-200",
   completed: "border-emerald-400/20 bg-emerald-500/10 text-emerald-200",
-  failed: "border-rose-400/20 bg-rose-500/10 text-rose-200"
+  failed: "border-rose-400/20 bg-rose-500/10 text-rose-200",
+  cancelled: "border-slate-400/20 bg-slate-500/10 text-slate-200"
 };
 
 const statusIcons = {
   pending: LoaderCircle,
   running: Timer,
   completed: CheckCircle2,
-  failed: AlertTriangle
+  failed: AlertTriangle,
+  cancelled: AlertTriangle
 };
 
 export function ProgressCard({ job }: ProgressCardProps) {

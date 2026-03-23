@@ -63,6 +63,7 @@ export function setAuthCookie(response: Response, token: string) {
     httpOnly: true,
     secure: isProduction,
     sameSite: "lax",
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
     path: "/",
     maxAge: 1000 * 60 * 60 * 12
   });
@@ -73,6 +74,7 @@ export function clearAuthCookie(response: Response) {
     httpOnly: true,
     secure: isProduction,
     sameSite: "lax",
+    ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
     path: "/"
   });
 }

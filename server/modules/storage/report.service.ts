@@ -22,6 +22,15 @@ export function resolveReportPath(fileName: string) {
   return path.join(ensureStorageDir(), fileName);
 }
 
+export async function storeExternalPdfReport(jobId: string, data: Buffer) {
+  const fileName = buildReportFileName(jobId);
+  const destinationPath = resolveReportPath(fileName);
+
+  await fs.promises.writeFile(destinationPath, data);
+
+  return fileName;
+}
+
 export async function createPdfReport(job: PentestJobDetail) {
   const fileName = buildReportFileName(job.id);
   const destinationPath = resolveReportPath(fileName);

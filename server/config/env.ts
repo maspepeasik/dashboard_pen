@@ -7,12 +7,16 @@ const envSchema = z.object({
   REDIS_URL: z.string().min(1),
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default("12h"),
-  APP_URL: z.string().url().default("http://localhost:3000"),
-  API_URL: z.string().url().default("http://localhost:4000"),
-  SOCKET_URL: z.string().url().default("http://localhost:4000"),
+  APP_URL: z.string().url().default("https://pentest.naren.web.id"),
+  API_URL: z.string().url().default("https://api.naren.web.id"),
+  SOCKET_URL: z.string().url().default("https://api.naren.web.id"),
   PORT: z.coerce.number().default(4000),
   REPORT_STORAGE_PATH: z.string().default("./storage/reports"),
-  CORS_ORIGIN: z.string().url().default("http://localhost:3000")
+  CORS_ORIGIN: z.string().url().default("https://pentest.naren.web.id"),
+  COOKIE_DOMAIN: z.string().min(1).optional(),
+  PENTESTBOT_API_URL: z.string().url().optional(),
+  PENTESTBOT_API_TOKEN: z.string().optional(),
+  PENTESTBOT_POLL_INTERVAL_MS: z.coerce.number().int().positive().default(2000)
 });
 
 export const env = envSchema.parse(process.env);
