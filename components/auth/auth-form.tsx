@@ -178,15 +178,6 @@ export function AuthForm({ mode }: AuthFormProps) {
                 </button>
               </form>
 
-              <p className="text-sm text-slate-400">
-                {mode === "login" ? "Need an account?" : "Already have access?"}{" "}
-                <Link
-                  href={mode === "login" ? "/register" : "/login"}
-                  className="font-medium text-teal-300 hover:text-teal-200"
-                >
-                  {mode === "login" ? "Register here" : "Sign in here"}
-                </Link>
-              </p>
             </div>
           </section>
         </div>
